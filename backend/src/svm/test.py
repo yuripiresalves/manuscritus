@@ -23,7 +23,7 @@ def preprocess_image(image_path, filename, output_dir):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     cv2.imwrite(os.path.join(output_dir, "1_grayscale.png"), img)
 
-    # Binariza a imagem usando o método de Abutaleb
+    # Binariza a imagem usando o método de Otsu
     thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     cv2.imwrite(os.path.join(output_dir, "2_binarizada.png"), thresh)
 
@@ -41,9 +41,12 @@ def preprocess_image(image_path, filename, output_dir):
 
     # Combina as bordas da máscara com a imagem binarizada original (NOVO)
     edges = cv2.bitwise_and(thresh, edges_mask)
-    cv2.imwrite(os.path.join(output_dir, "5_bordas.png"), edges)
+    
+    # Inverte a imagem para que o fundo fique branco e as bordas pretas
+    inverted_edges = cv2.bitwise_not(edges)
+    cv2.imwrite(os.path.join(output_dir, "5_bordas.png"), inverted_edges)
 
-    return edges
+    return inverted_edges
 
 def segment_image(image, filename, output_dir):
     """
@@ -73,12 +76,12 @@ def segment_image(image, filename, output_dir):
     # Imagem com linhas de segmentação
     segmented_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)  # Converte para colorida para as linhas
     for i in range(6):
-        cv2.line(segmented_image, (0, i*fragment_height), (width, i*fragment_height), (255, 255, 255), 2)  # Linhas horizontais
+        cv2.line(segmented_image, (0, i*fragment_height), (width, i*fragment_height), (0, 0, 255), 2)  # Linhas horizontais
         for j in range(4):
             fragment = image[i*fragment_height:(i+1)*fragment_height, j*fragment_width:(j+1)*fragment_width]
             fragments.append(fragment)
             cv2.imwrite(os.path.join(fragments_output_dir, f"7_fragmento_{i}_{j}.png"), fragment)
-            cv2.line(segmented_image, (j*fragment_width, 0), (j*fragment_width, height), (255, 255, 255), 2)  # Linhas verticais
+            cv2.line(segmented_image, (j*fragment_width, 0), (j*fragment_width, height), (0, 0, 255), 2)  # Linhas verticais
 
     cv2.imwrite(os.path.join(output_dir, "6_segmentacao.png"), segmented_image)
 
@@ -192,7 +195,6 @@ def extract_axial_inclination(fragment, filename, output_dir, fragment_index=1):
     plt.xlabel("Ângulo (graus)")
     plt.ylabel("Frequência")
     plt.title(f"Histograma da Inclinação Axial - Fragmento {fragment_index}")
-    # plt.xticks(angulos)
     plt.xlim(0, 180)
     plt.savefig(os.path.join(output_dir, f"8_histograma_fragmento_{fragment_index}.png"))
     plt.clf()
