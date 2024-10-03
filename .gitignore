@@ -1,3 +1,6 @@
 backend/test_manuscripts/
 backend/training_manuscripts/
+backend/**/output_images/
+backend/**/output_images3/
+backend/**/output_images5/
 __pycache__
