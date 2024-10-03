@@ -1,152 +1,102 @@
-import time
-import cv2
+import os
 import numpy as np
-from PIL import Image
+import matplotlib
+matplotlib.use('Agg') 
+import matplotlib.pyplot as plt
 
-def normaliza_histograma(vetangulo):
+def normalize_histogram(angle_vector):
     """
-    Normaliza o histograma de ângulos.
+    Normaliza o histograma de ângulos utilizando a técnica min-max.
 
     Args:
-      vetangulo: Vetor com a contagem de ângulos.
+      angle_vector: Vetor com a contagem de ângulos.
 
     Returns:
-      vetangulonormal: Vetor com a distribuição de ângulos normalizada.
+      normalized_angle_vector: Vetor com a distribuição de ângulos normalizada.
     """
+    
+    # Encontra o valor mínimo e máximo do vetor
+    min_val = np.min(angle_vector)
+    max_val = np.max(angle_vector)
+    
+    # Aplica a normalização min-max
+    normalized_angle_vector = (angle_vector - min_val) / (max_val - min_val)
 
-    vetangulonormal = np.zeros(17)
-    x = np.sum(vetangulo)
-    for cont in range(17):
-        vetangulonormal[cont] = vetangulo[cont] / x
-    return vetangulonormal
+    return normalized_angle_vector
 
-
-def elemento_estruturante_cinco(img):
+def slant(fragment, filename, output_dir, fragment_index=1):
     """
-    Calcula o histograma de ângulos de inclinação da escrita usando um elemento estruturante 5x5
-    e desenha marcações na imagem para destacar as áreas de interesse.
+    Extrai a inclinação axial de um fragmento utilizando a técnica de 
+    distribuição de borda direcional.
 
     Args:
-      img: Imagem binarizada.
+        fragment (numpy.ndarray): Fragmento da imagem com as bordas da escrita.
+        output_dir (str): Diretório para salvar as imagens.
+        fragment_index (int): Índice do fragmento.
 
     Returns:
-      tuple: Vetor com a contagem de ângulos e a imagem com as marcações.
+        numpy.ndarray: Vetor de características da inclinação axial.
     """
-
-    vetangulo = np.zeros(17, dtype=int)
-    h, w = img.shape
-    img_color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
-    for i in range(4, h):
-        for j in range(4, w - 4):
-            pixcentral = img[i, j]
-            if pixcentral == 0:
-                # Posição 0
-                if (img[i, j + 1] == 0) and (img[i, j + 2] == 0) and (img[i, j + 3] == 0) and (img[i, j + 4] == 0):
-                    vetangulo[0] += 1
-                    cv2.rectangle(img_color, (j, i), (j + 4, i), (0, 255, 0), 1)
-                # Posição 1
-                if (img[i, j + 1] == 0) and (img[i - 1, j + 2] == 0) and (img[i - 1, j + 3] == 0) and (img[i - 1, j + 4] == 0):
-                    vetangulo[1] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 2
-                if (img[i - 1, j + 1] == 0) and (img[i - 1, j + 2] == 0) and (img[i - 2, j + 3] == 0) and (img[i - 2, j + 4] == 0):
-                    vetangulo[2] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 3
-                if (img[i - 1, j + 1] == 0) and (img[i - 2, j + 2] == 0) and (img[i - 2, j + 3] == 0) and (img[i - 3, j + 4] == 0):
-                    vetangulo[3] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 4
-                if (img[i - 1, j + 1] == 0) and (img[i - 2, j + 2] == 0) and (img[i - 3, j + 3] == 0) and (img[i - 4, j + 4] == 0):
-                    vetangulo[4] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 5
-                if (img[i - 1, j + 1] == 0) and (img[i - 2, j + 2] == 0) and (img[i - 3, j + 2] == 0) and (img[i - 4, j + 3] == 0):
-                    vetangulo[5] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 6
-                if (img[i - 1, j + 1] == 0) and (img[i - 2, j + 1] == 0) and (img[i - 3, j + 2] == 0) and (img[i - 4, j + 2] == 0):
-                    vetangulo[6] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 7
-                if (img[i - 1, j] == 0) and (img[i - 2, j + 1] == 0) and (img[i - 3, j + 1] == 0) and (img[i - 4, j + 1] == 0):
-                    vetangulo[7] += 1
-                    cv2.line(img_color, (j, i), (j + 4, i - 4), (255, 0, 0), 1)
-                # Posição 8
-                if (img[i - 1, j] == 0) and (img[i - 2, j] == 0) and (img[i - 3, j] == 0) and (img[i - 4, j] == 0):
-                    vetangulo[8] += 1
-                    cv2.rectangle(img_color, (j - 4, i - 4), (j, i), (0, 255, 0), 1)
-                # Posição 9
-                if (img[i - 1, j] == 0) and (img[i - 2, j - 1] == 0) and (img[i - 3, j - 1] == 0) and (img[i - 4, j - 1] == 0):
-                    vetangulo[9] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 10
-                if (img[i - 1, j - 1] == 0) and (img[i - 2, j - 1] == 0) and (img[i - 3, j - 2] == 0) and (img[i - 4, j - 2] == 0):
-                    vetangulo[10] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 11
-                if (img[i - 1, j - 1] == 0) and (img[i - 2, j - 2] == 0) and (img[i - 3, j - 3] == 0) and (img[i - 4, j - 3] == 0):
-                    vetangulo[11] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 12
-                if (img[i - 1, j - 1] == 0) and (img[i - 2, j - 2] == 0) and (img[i - 3, j - 3] == 0) and (img[i - 4, j - 4] == 0):
-                    vetangulo[12] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 13
-                if (img[i - 1, j - 1] == 0) and (img[i - 2, j - 2] == 0) and (img[i - 3, j - 2] == 0) and (img[i - 4, j - 3] == 0):
-                    vetangulo[13] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 14
-                if (img[i - 1, j - 1] == 0) and (img[i - 2, j - 1] == 0) and (img[i - 3, j - 2] == 0) and (img[i - 4, j - 2] == 0):
-                    vetangulo[14] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 15
-                if (img[i - 1, j] == 0) and (img[i - 2, j - 1] == 0) and (img[i - 3, j - 1] == 0) and (img[i - 4, j - 1] == 0):
-                    vetangulo[15] += 1
-                    cv2.line(img_color, (j, i), (j - 4, i - 4), (255, 0, 0), 1)
-                # Posição 16
-                if (img[i - 1, j] == 0) and (img[i - 2, j] == 0) and (img[i - 3, j] == 0) and (img[i - 4, j] == 0):
-                    vetangulo[16] += 1
-                    cv2.rectangle(img_color, (j, i - 4), (j + 4, i), (0, 255, 0), 1)
-
-    return vetangulo, img_color
-
-def slant(image_data):
-    """
-    Processa uma única imagem e retorna o vetor de características.
-
-    Args:
-        image_data: Dados da imagem no formato bytes.
-
-    Returns:
-        list: Vetor de características (histograma de 17 posições normalizado).
-    """
+    output_dir = f"{output_dir}/{filename[:-4]}/histograms"
+    os.makedirs(output_dir, exist_ok=True)
     
-    print("Processando imagem...")
-       
-    file_bytes = np.frombuffer(image_data, dtype=np.uint8)
+    height, width = fragment.shape
     
-    img_original = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
-
-    img_suavizada = cv2.medianBlur(img_original, 5)
-
-    img_bin = cv2.adaptiveThreshold(img_suavizada, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    # Inicializa o vetor de características com 17 posições
+    axial_slant = np.zeros(17, dtype=int)
     
-    millis = int(round(time.time() * 1000))
-    cv2.imwrite(f"img_bin_{millis}.png", img_bin)    
-    
-    histograma, img_annotated = elemento_estruturante_cinco(img_bin)
+    # Itera sobre os pixels do fragmento, considerando o elemento estruturante 5x5
+    for i in range(4, height - 4):
+        for j in range(4, width - 4):
+            central_pixel = fragment[i, j]
+            if central_pixel == 0:
+                if (fragment[i, j + 1] == 0) and (fragment[i, j + 2] == 0) and (fragment[i, j + 3] == 0) and (fragment[i, j + 4] == 0):
+                    axial_slant[16] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-2, j + 2] == 0) and (fragment[i-3, j + 3] == 0) and (fragment[i-4, j + 4] == 0):
+                    axial_slant[15] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-1, j + 2] == 0) and (fragment[i-2, j + 3] == 0) and (fragment[i-2, j + 4] == 0):
+                    axial_slant[14] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-2, j + 2] == 0) and (fragment[i-2, j + 3] == 0) and (fragment[i-3, j + 4] == 0):
+                    axial_slant[13] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-2, j + 2] == 0) and (fragment[i-3, j + 3] == 0) and (fragment[i-4, j + 4] == 0):
+                    axial_slant[12] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-2, j + 2] == 0) and (fragment[i-3, j + 2] == 0) and (fragment[i-4, j + 3] == 0):
+                    axial_slant[11] += 1
+                if (fragment[i-1, j + 1] == 0) and (fragment[i-2, j + 1] == 0) and (fragment[i-3, j + 2] == 0) and (fragment[i-4, j + 2] == 0):
+                    axial_slant[10] += 1
+                if (fragment[i-1, j] == 0) and (fragment[i-2, j + 1] == 0) and (fragment[i-3, j + 1] == 0) and (fragment[i-4, j + 1] == 0):
+                    axial_slant[9] += 1
+                if (fragment[i-1, j] == 0) and (fragment[i-2, j] == 0) and (fragment[i-3, j] == 0) and (fragment[i-4, j] == 0):
+                    axial_slant[8] += 1
+                if (fragment[i-1, j] == 0) and (fragment[i-2, j - 1] == 0) and (fragment[i-3, j - 1] == 0) and (fragment[i-4, j - 1] == 0):
+                    axial_slant[7] += 1
+                if (fragment[i-1, j - 1] == 0) and (fragment[i-2, j - 1] == 0) and (fragment[i-3, j - 2] == 0) and (fragment[i-4, j - 2] == 0):
+                    axial_slant[6] += 1
+                if (fragment[i-1, j - 1] == 0) and (fragment[i-2, j - 2] == 0) and (fragment[i-3, j - 3] == 0) and (fragment[i-4, j - 3] == 0):
+                    axial_slant[5] += 1
+                if (fragment[i-1, j - 1] == 0) and (fragment[i-2, j - 2] == 0) and (fragment[i-3, j - 3] == 0) and (fragment[i-4, j - 4] == 0):
+                    axial_slant[4] += 1
+                if (fragment[i-1, j - 1] == 0) and (fragment[i-2, j - 2] == 0) and (fragment[i-3, j - 2] == 0) and (fragment[i-4, j - 3] == 0):
+                    axial_slant[3] += 1
+                if (fragment[i-1, j - 1] == 0) and (fragment[i-2, j - 1] == 0) and (fragment[i-3, j - 2] == 0) and (fragment[i-4, j - 2] == 0):
+                    axial_slant[2] += 1
+                if (fragment[i-1, j] == 0) and (fragment[i-2, j - 1] == 0) and (fragment[i-3, j - 1] == 0) and (fragment[i-4, j - 1] == 0):
+                    axial_slant[1] += 1
+                if (fragment[i, j - 1] == 0) and (fragment[i, j - 2] == 0) and (fragment[i, j - 3] == 0) and (fragment[i, j - 4] == 0):
+                    axial_slant[0] += 1
+                
 
-    vetor_caracteristicas = normaliza_histograma(histograma)
+    # Normaliza o vetor de características
+    axial_slant = normalize_histogram(axial_slant)
 
-    img_annotated = Image.fromarray(cv2.cvtColor(img_annotated, cv2.COLOR_BGR2RGB))
+    # Gera e salva o histograma da inclinação axial
+    angles = np.linspace(0, 180, 17, endpoint=False)
+    plt.bar(angles, axial_slant)
+    plt.xlabel("Ângulo (graus)")
+    plt.ylabel("Frequência")
+    plt.title(f"Histograma da Inclinação Axial - Fragment {fragment_index}")
+    plt.xlim(0, 180)
+    plt.savefig(os.path.join(output_dir, f"8_histograma_fragmento_{fragment_index}.png"))
+    plt.clf()
 
-    millis = int(round(time.time() * 1000))
-    img_annotated.save(f"imagem_anotada_{millis}.png")
-    
-    print(vetor_caracteristicas.tolist()) 
-    
-    print("Imagem processada.") 
-
-    return vetor_caracteristicas.tolist()
+    return axial_slant
