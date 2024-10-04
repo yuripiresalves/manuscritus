@@ -1,53 +1,45 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile, Query
+from fastapi import FastAPI
+from pydantic import BaseModel
 from typing import List
-import matplotlib
-matplotlib.use('Agg')  # Define o backend para Agg
-import matplotlib.pyplot as plt
 
-from features.slant import slant
-from svm.main import train_and_test_svm
+from models.main import init
+
+
+# Classe para validar o corpo da requisição
+class ModelRequest(BaseModel):
+    num_authors: int
+    models: List[str]
+
 
 app = FastAPI()
 
-@app.post("/manuscripts")
-async def train_data_and_return(training_images : List[UploadFile] = File(...), test_image : UploadFile = File(...), labels: int = Query(..., alias="labels")):
+
+@app.post("/results")
+async def get_results(request: ModelRequest):
     """
-    Recebe as imagens de treino e teste, treina o SVM e realiza a predição.
+    Realiza a carga dos dados, seleção de autores aleatórios, normalização das características e
+    testes de modelos de aprendizado de máquina (SVM e Random Forest).
+
+    Args:
+        request (ModelRequest): Um objeto contendo os parâmetros da requisição.
+            - num_authors (int): Número de autores aleatórios a serem selecionados para o teste.
+            - models (List[str]): Lista de modelos a serem testados. Os modelos podem incluir:
+                - "svm": para executar o modelo SVM.
+                - "random_forest": para executar o modelo Random Forest.
+
+    Returns:
+        dict: Um dicionário com as acurácias dos modelos testados. O dicionário pode conter:
+            - "accuracy_svm": Acurácia do modelo SVM (em percentual).
+            - "accuracy_svm_grid_search": Acurácia do modelo SVM com Grid Search (em percentual).
+            - "accuracy_rf": Acurácia do modelo Random Forest (em percentual).
+
+        Caso nenhum modelo reconhecido seja solicitado, o retorno será:
+            - "error": Mensagem indicando que nenhum modelo foi reconhecido.
     """
-    
-    if len(training_images) != 2:
-        raise HTTPException(status_code=400, detail="Exatamente duas imagens de treino são necessárias.")
-    
-    train_data = []
-    test_data = []
-    
-    for i, image in enumerate(training_images):
-        contents = await image.read()
-        result = slant(contents)
-        train_data.append(result)
-        
-        # Criar e salvar gráfico do histograma de treino
-        plt.figure()
-        plt.bar(range(17), result)
-        plt.title(f"Histograma Imagem de Treino {i+1}")
-        plt.xlabel("Ângulo")
-        plt.ylabel("Frequência Normalizada")
-        plt.savefig(f"histograma_treino_{i+1}.png")
-        plt.close()  # Fechar a figura para liberar memória
+    num_authors = request.num_authors
+    models = request.models
 
-    contents = await test_image.read()
-    result = slant(contents)
-    test_data.append(result)
-    
-     # Criar e salvar gráfico do histograma de teste
-    plt.figure()
-    plt.bar(range(17), result)
-    plt.title("Histograma Imagem de Teste")
-    plt.xlabel("Ângulo")
-    plt.ylabel("Frequência Normalizada")
-    plt.savefig("histograma_teste.png")
-    plt.close()  # Fechar a figura para liberar memória
+    # Inicializa o teste com os autores e modelos fornecidos
+    results = init(num_authors, models)
 
-    accuracy = train_and_test_svm(labels, train_data, test_data)
-
-    return {"accuracy": accuracy}
+    return results
