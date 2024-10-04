@@ -4,3 +4,4 @@ backend/**/output_images/
 backend/**/output_images3/
 backend/**/output_images5/
 __pycache__
+confusion_matrix.png
