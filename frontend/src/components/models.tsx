@@ -9,7 +9,7 @@ interface ModelsProps {
 export function Models({ models, setModels }: ModelsProps) {
   const availableModels = [
     { key: "svm", label: "SVM" },
-    { key: "random_forest", label: "Floresta Aleatória" },
+    { key: "random_forest", label: "Random Forest" },
     // { key: "knn", label: "KNN" },
     // { key: "decision_tree", label: "Árvore de Decisão" },
     // { key: "naive_bayes", label: "Naive Bayes" },

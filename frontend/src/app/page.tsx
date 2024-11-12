@@ -13,14 +13,24 @@ import {
 } from "@/components/ui/card";
 import { AuthorsNumber } from "@/components/authors-number";
 import { Models } from "@/components/models";
+import { useToast } from "@/hooks/use-toast";
 
 interface RequestData {
   num_authors: number;
   models: string[];
 }
 
+interface ResponseData {
+  accuracy_svm?: number;
+  accuracy_svm_grid_search?: number;
+  best_params_svm?: Record<string, string | number>;
+  accuracy_rf?: number;
+  confusion_matrix?: number[][];
+  error: number;
+}
+
 // Simulated API call
-const mockApiCall = async (data: RequestData) => {
+const getResultsFromApi = async (data: RequestData) => {
   const response = await fetch("http://localhost:8000/results", {
     method: "POST",
     headers: {
@@ -29,7 +39,7 @@ const mockApiCall = async (data: RequestData) => {
     body: JSON.stringify(data),
   });
 
-  const responseData = await response.json();
+  const responseData: ResponseData = await response.json();
   return responseData;
 };
 
@@ -42,10 +52,20 @@ export default function Home() {
     decision_tree: false,
     naive_bayes: false,
   });
-  const [response, setResponse] = useState<Record<string, number> | null>(null);
+  const [response, setResponse] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { toast } = useToast();
+
   const handleSubmit = async () => {
+    if (Object.values(models).every((value) => !value)) {
+      toast({
+        title: "Erro",
+        description: "Selecione ao menos um modelo para análise.",
+      });
+      return;
+    }
+
     setLoading(true);
     const requestData = {
       num_authors: numAuthors,
@@ -55,7 +75,7 @@ export default function Home() {
     };
 
     try {
-      const result = await mockApiCall(requestData);
+      const result = await getResultsFromApi(requestData);
       setResponse(result);
     } catch (error) {
       console.error("Error:", error);
@@ -70,14 +90,18 @@ export default function Home() {
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle>Manuscritus</CardTitle>
+          <p className="text-gray-500">
+            Ferramenta baseada em caractrísticas grafométricas para a
+            identificação de manuscritos.
+          </p>
         </CardHeader>
 
         <CardContent className="space-y-6">
           <p className="text-gray-500">
-            Você pode ajustar o número de autores e selecionar os modelos
-            específicos para análise. Após definir as configurações, clique em
+            Ajuste o número de autores e selecione os modelos específicos para
+            análise. Após definir as configurações, clique em
             <span className="font-bold"> Obter resultados</span> para visualizar
-            a acurácia de cada modelo modelo.
+            a acurácia de cada modelo.
           </p>
           <AuthorsNumber
             numAuthors={numAuthors}
@@ -103,7 +127,6 @@ export default function Home() {
             <div className="w-full">
               <h3 className="text-lg font-semibold mb-4">Acurácia:</h3>
               {loading ? (
-                //skeleton card
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Skeleton className="h-28" />
                   <Skeleton className="h-28" />
@@ -112,13 +135,16 @@ export default function Home() {
               ) : response.error !== -1 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(response).map(([key, value]) => (
-                    <Card key={key} className="bg-gray-100">
+                    <Card
+                      key={key}
+                      className="bg-gray-100 h-28 flex items-center"
+                    >
                       <CardContent className="p-4">
                         <h4 className="text-sm font-medium text-gray-500 mb-2">
                           {key === "accuracy_svm" && "SVM"}
                           {key === "accuracy_svm_grid_search" &&
-                            "SVM (Busca em Grade)"}
-                          {key === "accuracy_rf" && "Floresta Aleatória"}
+                            "SVM (Grid Search)"}
+                          {key === "accuracy_rf" && "Random Forest"}
                           {key === "accuracy_knn" && "KNN"}
                           {key === "accuracy_decision_tree" &&
                             "Árvore de Decisão"}
