@@ -62,6 +62,7 @@ export default function Home() {
       toast({
         title: "Erro",
         description: "Selecione ao menos um modelo para análise.",
+        variant: "destructive",
       });
       return;
     }
