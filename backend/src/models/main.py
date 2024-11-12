@@ -81,11 +81,12 @@ def init(num_authors, models):
 
     # Testar modelos
     if "svm" in models:
-        accuracy_svm, accuracy_svm_grid_search = train_and_test_svm(
+        accuracy_svm, accuracy_svm_grid_search, best_params_svm = train_and_test_svm(
             X_train, y_train, X_test, y_test
         )
         results["accuracy_svm"] = accuracy_svm * 100
         results["accuracy_svm_grid_search"] = accuracy_svm_grid_search * 100
+        results["best_params_svm"] = best_params_svm
 
     if "random_forest" in models:
         accuracy_rf = train_and_test_random_forest(X_train, y_train, X_test, y_test)

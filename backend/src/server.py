@@ -41,6 +41,7 @@ async def get_results(request: ModelRequest):
         dict: Um dicionário com as acurácias dos modelos testados. O dicionário pode conter:
             - "accuracy_svm": Acurácia do modelo SVM (em percentual).
             - "accuracy_svm_grid_search": Acurácia do modelo SVM com Grid Search (em percentual).
+            - "best_params_svm": Melhores parâmetros encontrados para o modelo SVM.
             - "accuracy_rf": Acurácia do modelo Random Forest (em percentual).
 
         Caso nenhum modelo reconhecido seja solicitado, o retorno será:

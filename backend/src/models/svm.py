@@ -94,7 +94,8 @@ def train_and_test_svm(X_train, y_train, X_test, y_test):
     print(f"Acurácia do SVM Grid Search: {accuracy_svm_grid_search * 100:.2f}%")
 
     # Exibir os melhores parâmetros encontrados
-    print(f"Melhores parâmetros: {svm_model.best_params_}")
+    best_params_svm = svm_model.best_params_
+    print(f"Melhores parâmetros: {best_params_svm}")
 
     # Plotar e salvar a matriz de confusão
     save_path = "../confusion_matrix.png"
@@ -102,4 +103,4 @@ def train_and_test_svm(X_train, y_train, X_test, y_test):
         y_test, y_pred, classes=svm_model.classes_, save_path=save_path
     )
 
-    return accuracy_svm, accuracy_svm_grid_search
+    return accuracy_svm, accuracy_svm_grid_search, best_params_svm
