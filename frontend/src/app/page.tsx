@@ -29,7 +29,6 @@ interface ResponseData {
   error: number;
 }
 
-// Simulated API call
 const getResultsFromApi = async (data: RequestData) => {
   const response = await fetch("http://localhost:8000/results", {
     method: "POST",
@@ -124,9 +123,8 @@ export default function Home() {
         </CardContent>
 
         {response && (
-          <CardFooter>
+          <CardFooter className="flex flex-col">
             <div className="w-full">
-              <h3 className="text-lg font-semibold mb-4">Acurácia:</h3>
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Skeleton className="h-28" />
@@ -134,30 +132,99 @@ export default function Home() {
                   <Skeleton className="h-28" />
                 </div>
               ) : response.error !== -1 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(response).map(([key, value]) => (
-                    <Card
-                      key={key}
-                      className="bg-gray-100 h-28 flex items-center"
-                    >
-                      <CardContent className="p-4">
-                        <h4 className="text-sm font-medium text-gray-500 mb-2">
-                          {key === "accuracy_svm" && "SVM"}
-                          {key === "accuracy_svm_grid_search" &&
-                            "SVM (Grid Search)"}
-                          {key === "accuracy_rf" && "Random Forest"}
-                          {key === "accuracy_knn" && "KNN"}
-                          {key === "accuracy_decision_tree" &&
-                            "Árvore de Decisão"}
-                          {key === "accuracy_naive_bayes" && "Naive Bayes"}
-                        </h4>
-                        <p className="text-4xl font-bold text-primary">
-                          {value.toFixed(2)}%
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <>
+                  <h3 className="text-lg font-semibold mb-4">Acurácia:</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {response.accuracy_svm && (
+                      <Card className="bg-gray-100">
+                        <CardContent className="p-4">
+                          <h4 className="text-sm font-medium text-gray-500 mb-2">
+                            SVM
+                          </h4>
+                          <p className="text-4xl font-bold text-primary">
+                            {response.accuracy_svm.toFixed(2)}%
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {response.accuracy_svm_grid_search && (
+                      <Card className="bg-gray-100">
+                        <CardContent className="p-4">
+                          <h4 className="text-sm font-medium text-gray-500 mb-2">
+                            SVM (Grid Search)
+                          </h4>
+                          <p className="text-4xl font-bold text-primary">
+                            {response.accuracy_svm_grid_search.toFixed(2)}%
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {response.accuracy_rf && (
+                      <Card className="bg-gray-100">
+                        <CardContent className="p-4">
+                          <h4 className="text-sm font-medium text-gray-500 mb-2">
+                            Random Forest
+                          </h4>
+                          <p className="text-4xl font-bold text-primary">
+                            {response.accuracy_rf.toFixed(2)}%
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                  <div>
+                    {/* {response.confusion_matrix && (
+                      <div className="w-full mt-8">
+                        <h3 className="text-lg font-semibold mb-4">
+                          Matriz de confusão:
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {response.confusion_matrix.map((row, i) => (
+                            <Card key={i} className="bg-gray-100">
+                              <CardContent className="p-4">
+                                <h4 className="text-sm font-medium text-gray-500 mb-2">
+                                  Classe {i}
+                                </h4>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {row.map((value, j) => (
+                                    <p key={j} className="text-center">
+                                      {value}
+                                    </p>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )} */}
+                    {response.best_params_svm && (
+                      <div className="w-full mt-8">
+                        <h3 className="text-lg font-semibold mb-4">
+                          Melhores parâmetros (SVM):
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {Object.entries(response.best_params_svm).map(
+                            ([key, value]) => (
+                              <Card key={key} className="bg-gray-100">
+                                <CardContent className="p-4">
+                                  <h4 className="text-sm font-medium text-gray-500 mb-2">
+                                    {key}
+                                  </h4>
+                                  <p className="text-4xl font-bold text-primary">
+                                    {value}
+                                  </p>
+                                </CardContent>
+                              </Card>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : response.error === -1 ? (
                 <p className="text-red-500">
                   Ocorreu um erro ao buscar os dados.
