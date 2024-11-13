@@ -59,8 +59,8 @@ def init(num_authors, models):
         dict: Um dicionário contendo a acurácia dos modelos testados.
     """
     # Carregar os dados de treino e teste
-    train_df = pd.read_csv("treino.csv")
-    test_df = pd.read_csv("teste.csv")
+    train_df = pd.read_csv("../../treino.csv")
+    test_df = pd.read_csv("../../teste.csv")
 
     # Selecionar autores aleatórios
     train_df, test_df = select_random_authors(train_df, test_df, num_authors)
