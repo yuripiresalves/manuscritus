@@ -1,0 +1,9 @@
+fastapi
+pydantic
+uvicorn
+opencv-python-headless
+scikit-learn
+seaborn
+matplotlib
+pandas
+numpy
