@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 
-from models.main import init
+from .models.main import init
 
 
 # Classe para validar o corpo da requisição
