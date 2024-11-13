@@ -30,7 +30,7 @@ interface ResponseData {
 }
 
 const getResultsFromApi = async (data: RequestData) => {
-  const response = await fetch("http://localhost:8000/results", {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/results`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
