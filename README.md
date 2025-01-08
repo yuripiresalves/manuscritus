@@ -73,7 +73,7 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC
    ```bash
    cd manuscritus/frontend
    ```
-2. Crie o arquivo .env na raiz do projeto e adicione a seguinte variável de ambiente:
+2. Crie um arquivo `.env` na raiz do projeto e adicione a seguinte variável de ambiente:
     ```bash
     NEXT_PUBLIC_API_URL="http://localhost:8000"
     ```
