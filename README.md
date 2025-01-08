@@ -4,7 +4,7 @@ Ferramenta para Identificação de Autoria de Manuscritos utilizando caracterís
 
 ## Descrição do Projeto
 
-Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) apresentado à Universidade Estadual de Maringá (UEM). A ferramenta propõe um método computacional para identificar a autoria de manuscritos, utilizando técnicas de aprendizado de máquina e características grafométricas extraídas de cartas manuscritas.
+Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) apresentado à Universidade Estadual de Maringá (UEM). A ferramenta propõe um método computacional para identificação de autoria de manuscritos, utilizando técnicas de aprendizado de máquina e características grafométricas extraídas de cartas manuscritas.
 
 ## Funcionalidades
 
