@@ -8,7 +8,7 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC
 
 ## Funcionalidades
 
-- **Pré-processamento de imagens:** Binarização, dilatação e erosão para segmentação e extração de bordas.
+- **Pré-processamento de imagens:** Binarização, dilatação, erosão e extração de bordas.
 - **Extração de características:** Foco na característica de inclinação axial para análise grafométrica.
 - **Treinamento e avaliação de modelos:** Utilização de algoritmos SVM e Random Forest.
 - **Interface web:** Permite configurações de parâmetros e visualização dos resultados.
@@ -45,6 +45,7 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC
 ### Pré-requisitos
 
 - Python 3.8 ou superior
+- Pip
 - Node.js 18 ou superior
 
 ### Configuração do Backend
@@ -63,7 +64,7 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC
    ```
 4. Execute o servidor FastAPI:
    ```bash
-   uvicorn main:app --reload
+   uvicorn src.server:app --reload
    ```
 
 ### Configuração do Frontend
@@ -72,11 +73,15 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso (TCC
    ```bash
    cd manuscritus/frontend
    ```
-2. Instale as dependências:
+2. Crie o arquivo .env na raiz do projeto e adicione a seguinte variável de ambiente:
+    ```bash
+    NEXT_PUBLIC_API_URL="http://localhost:8000"
+    ```
+3. Instale as dependências:
    ```bash
    npm install
    ```
-3. Inicie o servidor de desenvolvimento:
+4. Inicie o servidor de desenvolvimento:
    ```bash
    npm run dev
    ```
